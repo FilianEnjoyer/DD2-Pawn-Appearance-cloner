@@ -13078,7 +13078,7 @@ paso116_auditar_entradas_internas = function(character)
     logp("[PawnResearch] PASO 116 CID=" .. tostring(cid)
         .. " protegido=" .. tostring(is_character_protected(cid))
         .. " tdb=" .. tostring(safe(function() return sdk.get_tdb_version() end)))
-    logp("[PawnResearch] PASO 116 MODO: solo lectura; no se preparan caches ni se modifica apariencia")
+    logp("[PawnResearch] PASO 116 MODO: auditoria de solo lectura; puede preparar cache con setupApplyEditScales, sin escribir valores de joints ni modificar apariencia")
 
     local ps = get_part_swapper(character)
     local editor = get_field_value_by_name(ps, "_BodyEditor")
@@ -13089,7 +13089,17 @@ paso116_auditar_entradas_internas = function(character)
 
     local scales = get_field_value_by_name(editor, "_ApplyEditScales")
     if scales == nil then
-        logp("[PawnResearch] PASO 116 _ApplyEditScales=nil; no se invoca setupApplyEditScales en este paso")
+        logp("[PawnResearch] PASO 116 _ApplyEditScales=nil; preparando cache con setupApplyEditScales")
+        local setup_ok, setup_result = pcall(function()
+            return editor:call("setupApplyEditScales")
+        end)
+        logp("[PawnResearch] PASO 116 setupApplyEditScales ok=" .. tostring(setup_ok)
+            .. " result=" .. tostring(setup_result))
+        scales = get_field_value_by_name(editor, "_ApplyEditScales")
+    end
+
+    if scales == nil then
+        logp("[PawnResearch] PASO 116 _ApplyEditScales continua nil despues de setupApplyEditScales")
         return false, "_ApplyEditScales nil"
     end
 
